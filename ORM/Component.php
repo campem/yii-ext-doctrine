@@ -111,6 +111,8 @@ class Component extends \CApplicationComponent
      * Get an entity manager
      *
      * @param string $entityManager
+     * @return \Doctrine\ORM\EntityManager
+     * @throws \CException
      */
     public function getEntityManager($entityManager=self::DEFAULT_KEY)
     {
@@ -163,7 +165,7 @@ class Component extends \CApplicationComponent
      * Get a cache driver
      *
      * @param string $cache
-     * @return \Doctrine\Common\Cache\CacheProvider
+     * @return \Doctrine\Common\Cache\Cache
      */
     public function getCache($cache=self::DEFAULT_KEY)
     {
@@ -171,7 +173,7 @@ class Component extends \CApplicationComponent
             return $this->_cachedObjects['cache'][$cache];
         }
 
-        // if there is not configuration for the cache, the default cache driver will be returned
+        // if there is not a configuration for the cache, the default cache driver will be returned
         if (isset($this->caches[$cache]) === false) {
             $cache = new \Doctrine\Common\Cache\ArrayCache();
             $this->_cachedObjects['cache'][self::DEFAULT_KEY] = $cache;
@@ -181,9 +183,43 @@ class Component extends \CApplicationComponent
         return $this->_createCache($cache);
     }
 
+    /**
+     * Create a metadata driver
+     *
+     * @param array $options
+     * @return \Doctrine\ORM\Mapping\Driver\YamlDriver
+     * @throws \CException
+     */
     private function _createMetadataDriver(array $options)
     {
+        // throw exception if paths not set
+        if (isset($options['paths']) === false) {
+            throw new \CException(\Yii::t('kf.ext', 'No paths set for yaml mapping'));
+        }
 
+        $paths = array();
+        foreach ($options['paths'] as $path) {
+            $paths[] = \Yii::getPathOfAlias($path);
+        }
+
+        if ($options['type'] === 'yaml') {
+            $driver = new \Doctrine\ORM\Mapping\Driver\YamlDriver($paths);
+        } else if ($options['type'] === 'xml') {
+            $driver = new \Doctrine\ORM\Mapping\Driver\XmlDriver($paths);
+        } else if ($options['type'] === 'php') {
+            $driver = new \Doctrine\ORM\Mapping\Driver\PHPDriver($paths);
+        } else {
+            throw new \CException(\Yii::t(
+                'kf.ext',
+                'Annotation, PHP, XML and YAML are the only supported metadata drivers of this extension'
+            ));
+        }
+
+        if (isset($options['fileExtension']) === true) {
+            $driver->setFileExtension($options['fileExtension']);
+        }
+
+        return $driver;
     }
 
     /**
