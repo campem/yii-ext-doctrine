@@ -8,6 +8,7 @@ define('DOCTRINE_COMMON_DIR', VENDOR_DIR . '/doctrine2/lib/vendor/doctrine-commo
 define('DOCTRINE_DBAL_DIR', VENDOR_DIR . '/doctrine2/lib/vendor/doctrine-dbal/lib', true);
 define('DOCTRINE_ORM_DIR', VENDOR_DIR . '/doctrine2/lib', true);
 define('SYMFONY_DIR', VENDOR_DIR . '/doctrine2/lib/vendor', true);
+define('CACHE_DIR', realpath(__DIR__ . '/../../cache'), true);
 
 // load the doctrine class loader
 require_once DOCTRINE_COMMON_DIR . '/Doctrine/Common/Classloader.php';
@@ -44,16 +45,10 @@ class Component extends \CApplicationComponent
     protected $entityManagers = array();
 
     /**
-     * The default entity manager configuration key
-     * @var string
+     * The connection configurations
+     * @var array
      */
-    protected $defaultEntityManager = 'default';
-
-    /**
-     * The default cache configuration
-     * @var string
-     */
-    protected $defaultCache = 'default';
+    protected $connections = array();
 
     /**
      * A place to store objects
@@ -92,26 +87,6 @@ class Component extends \CApplicationComponent
     }
 
     /**
-     * Set the default entity manager
-     *
-     * @param string $entityManager
-     */
-    public function setDefaultEntityManager($entityManager=self::DEFAULT_KEY)
-    {
-        $this->defaultEntityManager = $entityManager;
-    }
-
-    /**
-     * Sets the default cache configuration
-     *
-     * @param string $cache
-     */
-    public function setDefaultCache($cache=self::DEFAULT_KEY)
-    {
-        $this->defaultCache = $cache;
-    }
-
-    /**
      * Set the cache configurations
      *
      * @param array $caches
@@ -123,13 +98,46 @@ class Component extends \CApplicationComponent
     }
 
     /**
+     * Set connection configuration
+     *
+     * @param array $connections
+     */
+    public function setConnections(array $connections)
+    {
+        $this->connections = $connections;
+    }
+
+    /**
      * Get an entity manager
      *
      * @param string $entityManager
      */
     public function getEntityManager($entityManager=self::DEFAULT_KEY)
     {
+        if (isset($this->_cachedObjects['entityManagers'][$entityManager]) === true) {
+            return $this->_cachedObjects['entityManagers'][$entityManager];
+        }
 
+        if (isset($this->entityManagers[$entityManager]) === false) {
+            throw new \CException(\Yii::t('kf.ext', 'There is no Entity Manager specified by the name of "{name}"', array(
+                '{name}' => $entityManager,
+            )));
+        }
+
+        $defaults = array(
+            'cache' => 'default',
+            'metadataDriver' => array(
+
+            ),
+        );
+
+        $options = array_merge($defaults, $this->entityManagers[$entityManager]);
+
+        $config = new Configuration();
+        $config->setMetadataCacheImpl($this->_createCache($options['cache']));
+        $config->setMetadataDriverImpl($options['metadataDriver']);
+
+        var_dump($config);
     }
 
     /**
@@ -138,7 +146,7 @@ class Component extends \CApplicationComponent
      * @param string $cache
      * @return \Doctrine\Common\Cache\CacheProvider
      */
-    public function getCacheDriver($cache=self::DEFAULT_KEY)
+    public function getCache($cache=self::DEFAULT_KEY)
     {
         if (isset($this->_cachedObjects['cache'][$cache]) === true) {
             return $this->_cachedObjects['cache'][$cache];
@@ -152,6 +160,11 @@ class Component extends \CApplicationComponent
         }
 
         return $this->_createCache($cache);
+    }
+
+    private function _createMetadataDriver(array $options)
+    {
+
     }
 
     /**
@@ -280,6 +293,41 @@ class Component extends \CApplicationComponent
         }
 
         return $memcache;
+    }
+
+    public function getConnection($connection=self::DEFAULT_KEY)
+    {
+        if (isset($this->_cachedObjects['connection'][$connection]) === true) {
+            return $this->_cachedObjects['connection'][$connection];
+        }
+
+        if (isset($this->connections[$connection]) === false) {
+            throw new \CException(\Yii::t('kf.ext', 'There is no configuration set for "{name}"', array(
+                '{name}' => $connection,
+            )));
+        }
+
+        $default = array(
+            'dbname' => '',
+            'user' => '',
+            'password' => '',
+            'host' => 'localhost',
+            'driver' => 'pdo_mysql',
+        );
+
+        $params = array_replace_recursive($default, $this->connections[$connection]);
+        $config = new \Doctrine\DBAL\Configuration();
+
+        if (isset($params['resultCache']) === true) {
+            unset($params['resultCache']);
+            $cache = $this->_createCache($params['resultCache']);
+            $config->setResultCacheImpl($cache);
+        }
+
+        $conn = \Doctrine\DBAL\DriverManager::getConnection($params, $config);
+        $this->_cachedObjects['connection'][$connection] = $conn;
+
+        return $conn;
     }
 
 }
