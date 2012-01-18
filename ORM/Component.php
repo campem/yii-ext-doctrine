@@ -114,8 +114,8 @@ class Component extends \CApplicationComponent
      */
     public function getEntityManager($entityManager=self::DEFAULT_KEY)
     {
-        if (isset($this->_cachedObjects['entityManagers'][$entityManager]) === true) {
-            return $this->_cachedObjects['entityManagers'][$entityManager];
+        if (isset($this->_cachedObjects['entityManager'][$entityManager]) === true) {
+            return $this->_cachedObjects['entityManager'][$entityManager];
         }
 
         if (isset($this->entityManagers[$entityManager]) === false) {
@@ -125,19 +125,38 @@ class Component extends \CApplicationComponent
         }
 
         $defaults = array(
-            'cache' => 'default',
-            'metadataDriver' => array(
-
-            ),
+            'metadataCache' => 'default',
+            'metadataDriver' => null,
+            'entityPaths' => array(),
+            'queryCache' => 'default',
+            'autoGenerateProxyClasses' => true,
+            'proxyDirectory' => CACHE_DIR . '/proxies',
+            'proxyNamespace' => 'KodeFoundryProxy',
+            'connection' => 'default',
         );
 
         $options = array_merge($defaults, $this->entityManagers[$entityManager]);
 
         $config = new Configuration();
-        $config->setMetadataCacheImpl($this->_createCache($options['cache']));
-        $config->setMetadataDriverImpl($options['metadataDriver']);
+        $config->setMetadataCacheImpl($this->getCache($options['metadataCache']));
+        $config->setQueryCacheImpl($this->getCache($options['queryCache']));
+        $config->setAutoGenerateProxyClasses((bool) $options['autoGenerateProxyClasses']);
+        $config->setProxyDir($options['proxyDirectory']);
+        $config->setProxyNamespace($options['proxyNamespace']);
 
-        var_dump($config);
+        if ($options['metadataDriver'] === null) {
+            $driverImpl = $config->newDefaultAnnotationDriver($options['entityPaths']);
+        } else {
+            $driverImpl = $this->_createMetadataDriver($options['metadataDriver']);
+        }
+
+        $config->setMetadataDriverImpl($driverImpl);
+
+        $em = \Doctrine\ORM\EntityManager::create($this->getConnection($options['connection']), $config);
+
+        $this->_cachedObjects['entityManager'][$entityManager] = $em;
+
+        return $em;
     }
 
     /**
