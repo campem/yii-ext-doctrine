@@ -71,12 +71,14 @@ class CacheComponent extends \CApplicationComponent
 
         // if there is not a configuration for the cache, the default cache driver will be returned
         if (isset($this->caches[$cache]) === false) {
-            $cache = new \Doctrine\Common\Cache\ArrayCache();
-            $this->_cachedObjects['cache'][self::DEFAULT_KEY] = $cache;
-            return $cache;
+            $driver = new \Doctrine\Common\Cache\ArrayCache();
+            $this->_cachedObjects[$cache] = $driver;
+            return $driver;
         }
 
-        return $this->_createCache($cache);
+        $driver = $this->_createCache($cache);
+        $this->_cachedObjects[$cache] = $driver;
+        return $driver;
     }
 
     /**
@@ -115,7 +117,7 @@ class CacheComponent extends \CApplicationComponent
 
         if ($driver instanceof \Doctrine\Common\Cache\CacheProvider) {
             $driver->setNamespace($config['namespace']);
-            $this->_cachedObjects['cache'][$cache] = $driver;
+            $this->_cachedObjects[$cache] = $driver;
             return $driver;
         }
 

@@ -1,5 +1,5 @@
 .idea
-tests/coverage
+tests/coverage/*
 cache/*
 !cache/.htaccess
 build

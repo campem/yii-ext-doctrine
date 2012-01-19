@@ -9,7 +9,7 @@
         <exec command="phpunit ${project.basedir}/tests" />
     </target>
 
-    <target name="build-release" description="Build a new release" depends="clean">
+    <target name="build-release" description="Build a new release" depends="clean,phpunit">
         <mkdir dir="${project.basedir}/build" />
         <mkdir dir="${project.basedir}/build/KodeFoundry" />
         <mkdir dir="${project.basedir}/build/KodeFoundry/Doctrine" />
