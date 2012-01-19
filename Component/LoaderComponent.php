@@ -21,16 +21,6 @@ use Doctrine\Common\ClassLoader,
 class LoaderComponent extends \CApplicationComponent
 {
     /**
-     * @var bool
-     */
-    public $dbal = true;
-
-    /**
-     * @var bool
-     */
-    public $orm = true;
-
-    /**
      * Initialise
      */
     public function init()
@@ -41,15 +31,10 @@ class LoaderComponent extends \CApplicationComponent
         $classLoader = new ClassLoader('Symfony', SYMFONY_DIR);
         \Yii::registerAutoloader(array($classLoader, 'loadClass'));
 
-        if ($this->dbal === true) {
-            $classLoader = new ClassLoader('Doctrine\DBAL', DOCTRINE_DBAL_DIR);
-            \Yii::registerAutoloader(array($classLoader, 'loadClass'));
-        }
+        $classLoader = new ClassLoader('Doctrine\DBAL', DOCTRINE_DBAL_DIR);
+        \Yii::registerAutoloader(array($classLoader, 'loadClass'));
 
-        if ($this->orm === true) {
-            $classLoader = new ClassLoader('Doctrine\ORM', DOCTRINE_ORM_DIR);
-            \Yii::registerAutoloader(array($classLoader, 'loadClass'));
-        }
-
+        $classLoader = new ClassLoader('Doctrine\ORM', DOCTRINE_ORM_DIR);
+        \Yii::registerAutoloader(array($classLoader, 'loadClass'));
     }
 }

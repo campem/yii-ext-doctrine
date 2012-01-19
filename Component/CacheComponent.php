@@ -7,6 +7,7 @@ namespace KodeFoundry\Doctrine\Component;
  * @author  Kevin Bradwick <kbradwick@gmail.com>
  * @package KodeFoundry\Doctrine
  * @license New BSD http://www.opensource.org/licenses/bsd-license.php
+ * @link    https://github.com/kodefoundry/yii-ext-doctrine/
  */
 class CacheComponent extends \CApplicationComponent
 {

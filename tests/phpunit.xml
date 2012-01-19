@@ -7,6 +7,8 @@
     <filter>
         <whitelist>
             <file>../Component/CacheComponent.php</file>
+            <file>../Component/ConnectionComponent.php</file>
+            <file>../Component/EntityManagerComponent.php</file>
         </whitelist>
     </filter>
 

@@ -20,5 +20,5 @@ $classLoader = new ClassLoader('KodeFoundry\Doctrine', realpath(__DIR__ . '/../.
 $classLoader->register();
 
 // YiiBase.php
-$yiiBase = realpath(__DIR__ . '/../../../../../../yii/framework') . '/YiiBase.php';
+$yiiBase = realpath(__DIR__ . '/../../../../../../yii/framework') . '/yiit.php';
 require_once $yiiBase;

@@ -2,12 +2,10 @@
 
 namespace KodeFoundry\Test\YiiFramework\Extension\Doctrine\Component;
 
-use KodeFoundry\Doctrine\Component\LoaderComponent;
-
 /**
  *
- * @author  Kevin Bradwick <kbradwick@gmail.com>
- * @package
+ * @author  Kevin Bradwick <kevin@kodefoundry.com>
+ * @package KodeFoundry\YiiExt\Tests
  * @license
  */
 class CacheComponentTest extends \PHPUnit_Framework_TestCase
