@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="KodeFoundry - Yii Ext Doctrine2" default="dist">
+
+    <target name="dist">
+
+    </target>
+
+    <target name="phpunit" description="Run all unit tests">
+        <exec command="phpunit ${project.basedir}/tests" />
+    </target>
+
+    <target name="build-release" description="Build a new release" depends="clean">
+        <mkdir dir="${project.basedir}/build" />
+        <mkdir dir="${project.basedir}/build/KodeFoundry" />
+        <mkdir dir="${project.basedir}/build/KodeFoundry/Doctrine" />
+        <mkdir dir="${project.basedir}/build/KodeFoundry/vendor" />
+        <mkdir dir="${project.basedir}/build/KodeFoundry/cache" />
+        
+        <!-- copy doctrine across -->
+        <copy todir="${project.basedir}/build/KodeFoundry/Doctrine">
+            <fileset dir="${project.basedir}">
+                <include name="Command/**" />
+                <include name="Component/**" />
+                <exclude name="Component/config.php" />
+            </fileset>
+        </copy>
+        <copy todir="${project.basedir}/build/KodeFoundry/Doctrine/Component">
+            <fileset dir="${project.basedir}">
+                <include name="config-dist.php" />
+            </fileset>
+        </copy>
+        <move file="${project.basedir}/build/KodeFoundry/Doctrine/Component/config-dist.php"
+              tofile="${project.basedir}/build/KodeFoundry/Doctrine/Component/config.php" />
+    </target>
+
+    <target name="clean" description="Clean up directory">
+        <delete dir="${project.basedir}/build" verbose="true" />
+    </target>
+
+</project>

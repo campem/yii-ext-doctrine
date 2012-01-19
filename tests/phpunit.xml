@@ -1,0 +1,7 @@
+<phpunit colors="true" bootstrap="bootstrap.php">
+
+    <testsuite name="All Tests">
+        <directory>Doctrine/*</directory>
+    </testsuite>
+
+</phpunit>
