@@ -1,1 +1,5 @@
 .idea
+tests/coverage
+cache/*
+!cache/.htaccess
+build
