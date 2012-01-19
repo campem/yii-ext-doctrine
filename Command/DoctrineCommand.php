@@ -62,7 +62,7 @@ class DoctrineCommand extends CConsoleCommand
      */
     protected function getCli()
     {
-        $em = Yii::app()->doctrine->getEntityManager();
+        $em = Yii::app()->doctrineEntityManager->getEntityManager();
 
         $helperSet = new HelperSet(
             array(
